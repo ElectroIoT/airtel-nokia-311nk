@@ -40,8 +40,28 @@
 
   iptables -I INPUT -p tcp --dport 22 -j ACCEPT 2>/dev/null
   iptables -I INPUT -p tcp --dport 23 -j ACCEPT 2>/dev/null
+  iptables -I INPUT 1 -i bridge0 -j ACCEPT 2>/dev/null
+  iptables -I INPUT 1 -p tcp --dport 80 -j ACCEPT 2>/dev/null
+  iptables -I INPUT 1 -p tcp --dport 443 -j ACCEPT 2>/dev/null
   pidof telnetd >/dev/null 2>&1 || setsid /bin/busybox telnetd -l /bin/sh >/dev/null 2>&1 &
   kill -HUP $(pidof sshd) 2>/dev/null || /usr/sbin/sshd -p 22 -f /etc/ssh/sshd_config_ext 2>/dev/null
+
+  # Lighttpd Web UI configuration (Port 80 & 443 on 0.0.0.0)
+  sed -i 's|server.bind = "127.0.0.1"|server.bind = "0.0.0.0"|g' /etc/hb/lighttpd.conf 2>/dev/null
+  sed -i 's|/webs/config/tmp|/tmp|g' /etc/hb/lighttpd.conf 2>/dev/null
+  if [ ! -f /tmp/key.pem ] && [ -f /configs/download/key.pem ]; then
+    /usr/bin/LighttpdMgr /configs/download/key.pem /tmp/key.pem 2>/dev/null
+    chown webServer:root /tmp/key.pem 2>/dev/null
+    chmod 600 /tmp/key.pem 2>/dev/null
+  fi
+  pidof lighttpd >/dev/null 2>&1 || (/bin/lighttpd.sh -f /etc/hb/lighttpd.conf -m /webs/config/lib -D &)
+
+  # DHCP Server Gateway & DNS injection (Push 192.168.0.1 as default gateway to connected devices)
+  grep -q "dhcp-option-force=3,192.168.0.1" /etc/data/dnsmasq.conf 2>/dev/null || echo "dhcp-option-force=3,192.168.0.1" >> /etc/data/dnsmasq.conf 2>/dev/null
+  grep -q "dhcp-option-force=6,192.168.0.1" /etc/data/dnsmasq.conf 2>/dev/null || echo "dhcp-option-force=6,192.168.0.1" >> /etc/data/dnsmasq.conf 2>/dev/null
+  grep -q "dhcp-option-force=3,192.168.0.1" /var/run/data/dnsmasq.conf.bridge0 2>/dev/null || echo "dhcp-option-force=3,192.168.0.1" >> /var/run/data/dnsmasq.conf.bridge0 2>/dev/null
+  cfgcli -s InternetGatewayDevice.LANDevice.1.LANHostConfigManagement.IPRouters 192.168.0.1 2>/dev/null
+  pidof dnsmasq >/dev/null 2>&1 || (/usr/bin/dnsmasq --conf-file=/var/run/data/dnsmasq.conf.bridge0 --user=radio --group=radio &)
 
   killall -9 nuspd 2>/dev/null
   echo "none" > /configs/uspprimController 2>/dev/null
@@ -102,6 +122,19 @@
       killall -9 cfgmgr 2>/dev/null
       setsid /bin/start_cfgmgr.sh >/tmp/cfgmgr_start.log 2>&1 &
     fi
+
+    # Watchdog & self-heal lighttpd Web UI
+    if ! pgrep lighttpd >/dev/null 2>&1; then
+      if [ ! -f /tmp/key.pem ] && [ -f /configs/download/key.pem ]; then
+        /usr/bin/LighttpdMgr /configs/download/key.pem /tmp/key.pem 2>/dev/null
+        chown webServer:root /tmp/key.pem 2>/dev/null
+        chmod 600 /tmp/key.pem 2>/dev/null
+      fi
+      /bin/lighttpd.sh -f /etc/hb/lighttpd.conf -m /webs/config/lib -D &
+    fi
+
+    # Watchdog & self-heal dnsmasq DHCP
+    pgrep dnsmasq >/dev/null 2>&1 || (/usr/bin/dnsmasq --conf-file=/var/run/data/dnsmasq.conf.bridge0 --user=radio --group=radio &)
 
     WAN=""
     if ip a show rmnet_data1 2>/dev/null | grep -q 'inet '; then
