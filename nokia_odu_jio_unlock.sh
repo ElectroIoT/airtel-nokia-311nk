@@ -235,6 +235,16 @@ configure_networking_and_firewall() {
     # 1. Wait briefly for QCMAP to bind network devices if just restarted
     sleep 3
 
+    # Switch Qualcomm SDX65 modem to physical SIM Slot 1 (Jio USIM tray)
+    log_info "Ensuring Qualcomm SDX65 is switched to physical SIM Slot 1 (Jio USIM tray)..."
+    exec 3<>/dev/smd11 2>/dev/null && {
+        echo -e "AT+QUIMSLOT=1\r" >&3
+        sleep 1
+        echo -e "AT+CFUN=1\r" >&3
+        sleep 0.5
+        exec 3>&-
+    }
+
     # 2. Enable Kernel Packet Forwarding for IPv4 & IPv6
     log_info "Enabling kernel IPv4 and IPv6 forwarding..."
     echo 1 > /proc/sys/net/ipv4/ip_forward 2>/dev/null || true
@@ -474,12 +484,41 @@ install_reboot_persistence() {
         /bin/send_led_event.sh -e 5817 -a '{"ActiveWAN":"Cellular"}' 2>/dev/null || true
     fi
 
+    # Switch Qualcomm SDX65 to physical SIM Slot 1 (Jio USIM tray) and activate radio
+    exec 3<>/dev/smd11 2>/dev/null && {
+        echo -e "AT+QUIMSLOT=1\r" >&3
+        sleep 1
+        echo -e "AT+CFUN=1\r" >&3
+        sleep 0.5
+        exec 3>&-
+    }
+
     while true; do
         echo 1 > /proc/sys/net/ipv4/ip_forward 2>/dev/null || true
         echo 1 > /proc/sys/net/ipv4/conf/bridge0/forwarding 2>/dev/null || true
         echo 1 > /proc/sys/net/ipv4/conf/all/forwarding 2>/dev/null || true
         echo 0 > /proc/sys/net/bridge/bridge-nf-call-iptables 2>/dev/null || true
         echo "0:700" > /configs/uptime 2>/dev/null || true
+
+        # Re-check WAN interface and ensure default route & SIM Slot 1
+        WAN=""
+        if ip a show rmnet_data1 2>/dev/null | grep -q 'inet '; then
+            WAN="rmnet_data1"
+        elif ip a show rmnet_data0 2>/dev/null | grep -q 'inet '; then
+            WAN="rmnet_data0"
+        fi
+
+        if [ -n "$WAN" ]; then
+            ip route show | grep -q "default .* $WAN" || ip route replace default dev "$WAN" 2>/dev/null || true
+        else
+            exec 3<>/dev/smd11 2>/dev/null && {
+                echo -e "AT+QUIMSLOT=1\r" >&3
+                sleep 1
+                echo -e "AT+CFUN=1\r" >&3
+                sleep 0.5
+                exec 3>&-
+            }
+        fi
         sleep 10
     done
 ) &

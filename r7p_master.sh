@@ -187,7 +187,9 @@ done
 # 6. Continuous Jio 5G Watchdog Daemon (Runs in Foreground for AIC)
 # ------------------------------------------------------------------------------
 echo "[r7p-watchdog] Entering continuous watchdog loop..."
-sleep 3
+echo "[r7p] Switching Qualcomm SDX65 to physical SIM Slot 1 (Jio USIM)..."
+send_smd11 "AT+QUIMSLOT=1"
+sleep 1
 send_smd11 "AT+CFUN=1"
 
 while true; do
@@ -225,7 +227,9 @@ while true; do
   fi
 
   if [ -z "$WAN_IF" ]; then
-    echo "[r7p-watchdog] WAN down, verifying radio & restarting QCMAP..."
+    echo "[r7p-watchdog] WAN down, verifying SIM Slot 1 & radio..."
+    send_smd11 "AT+QUIMSLOT=1"
+    sleep 1
     send_smd11 "AT+CFUN=1"
     systemctl restart QCMAP_ConnectionManagerd 2>/dev/null
     sleep 8

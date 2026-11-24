@@ -292,9 +292,9 @@ apnctl reboot
 
 ---
 
-## 💡 The Physical SIM (Jio) Reboot Issue Explained
+## 💡 The Physical SIM (Jio) Reboot Issue & Permanent AT Command Fix
 
-### Why does a physical Jio SIM require re-inserting (hot-plug) after reboot?
+### Root Cause: Qualcomm SDX65 Dual-SIM Slot Selection (`AT+QUIMSLOT`)
 
 In the Airtel firmware logs (`LOG.CellularMgr`):
 ```text
@@ -302,11 +302,23 @@ GetCellularNetworkIdentification: usimStatus is None, esimStatus is Valid
 GetCellularNetworkIdentification: getESIMProfilesObject find esim profile, iccid is 899110...
 ```
 
-1. **Boot Priority:** During power-on or reboot, the baseband driver prioritizes the soldered onboard **eSIM profile** (`esimStatus is Valid`). The physical SIM tray (`usimStatus`) is left unpowered.
-2. **The Hot-Plug Interrupt:** When you pull out the physical SIM tray and push it back in while the ODU is powered on, the mechanical tray switch triggers a hardware GPIO interrupt (`SIM_DETECT`).
-3. This interrupt forces the Qualcomm modem baseband to handle a **"SIM State Change"**, switching the active slot from eSIM to the external **USIM slot**, latching onto Jio!
-
-> **Tip:** Once locked to `apnctl n78` with APN `jionet`, the ODU maintains a persistent 5G SA latch on Band n78.
+1. **Dual SIM Architecture:**
+   - **Slot 1 (`+QUIMSLOT: 1`)**: External physical USIM card tray (`IMSI: 405862082013816`, Reliance Jio True 5G).
+   - **Slot 2 (`+QUIMSLOT: 2`)**: Internal soldered eSIM profile (`IMSI: 404100803787172`, Bharti Airtel).
+2. **Boot Default:** During power-on or cold reboot, the Qualcomm SDX65 baseband driver defaults to **Slot 2** (the internal eSIM). As a result, the physical SIM tray (`Slot 1`) is left completely unpowered (`usimStatus is None`).
+3. **The AT Command Solution (No Hot-Plug Needed!):**
+   Instead of physically pulling out and re-inserting the SIM tray, sending `AT+QUIMSLOT=1` directly to `/dev/smd11` switches the baseband multiplexer to the physical SIM tray in software:
+   ```bash
+   exec 3<>/dev/smd11 && {
+     echo -e "AT+QUIMSLOT=1\r" >&3
+     sleep 1
+     echo -e "AT+CFUN=1\r" >&3
+     sleep 0.5
+     exec 3>&-
+   }
+   ```
+4. **Permanent Autonomous Daemon (`/configs/r7p.sh`)**:
+   This AT switch is incorporated into [`/configs/r7p.sh`](r7p_device.sh) and executed automatically on every boot via [`/configs/aic_conf.json`](NOKIA_ODU_FULL_DUMP_20261124_LIVE/system_diagnostics/aic_conf.json), ensuring that the physical Jio SIM is powered on, registered (`+COPS: "JIO 4G"`, `rmnet_data0`/`rmnet_data1`), and routed through NAT masquerade immediately upon startup.
 
 ---
 

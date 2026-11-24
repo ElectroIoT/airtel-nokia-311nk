@@ -194,27 +194,51 @@ The modem hardware interfaces through the Qualcomm IP Accelerator (`IPA` / `rmne
 
 ## 8. Permanent Standalone Unlock Architecture (Jio True 5G / Any Carrier)
 
-To run the Nokia AOD311NK as an independent high-performance 5G SA gateway on Reliance Jio, BSNL, Vi, or Airtel without the proprietary IDU:
+### A. The 4 Root Causes Why Jio USIM Had No Internet Out-of-the-Box
+1. **Qualcomm SDX65 Dual-SIM Slot Selection (`AT+QUIMSLOT`)**:
+   - The Nokia AOD311NK hardware features dual-SIM capabilities:
+     - **Slot 1 (`+QUIMSLOT: 1`)**: External physical USIM card tray (`IMSI: 405862082013816`, Reliance Jio True 5G).
+     - **Slot 2 (`+QUIMSLOT: 2`)**: Internal soldered eSIM profile (`IMSI: 404100803787172`, Bharti Airtel).
+   - On cold boot, the modem defaults to **Slot 2** (the Airtel eSIM). The physical card in Slot 1 was kept unpowered and unselected until explicit AT switching command `AT+QUIMSLOT=1` was sent to `/dev/smd11`.
+2. **Layer-2 EoGRE Tunnel Hijack (`gretap2` / `br_gre`)**:
+   - Stock firmware binds user traffic arriving on Ethernet `eth0` to bridge `br_gre` tagged with VLAN 1081. This encapsulates packets into L2 EoGRE destined for non-existent Airtel BNG concentrators instead of performing standard IPv4/IPv6 IP routing.
+3. **TR-181 Operator Lock & Cell Lock Drop (`action_handletraffic.sh`)**:
+   - When a non-Airtel SIM is detected, Nokia's PCD event supervisor triggers Event `5826` (`/Device/Service/Config/UserTraffic`), deliberately setting `/proc/sys/net/ipv4/ip_forward` to `0` and killing routing.
+4. **Untagged Ethernet Silence**:
+   - The ODU does not run DHCP on untagged frames by default. Clients must connect via 802.1Q **VLAN 1999** with IP `192.168.0.x/24` and gateway `192.168.0.1`.
 
-1. **Disarm Watchdogs & Reboot Loops**:
-   Bind-mount `/systemrw/dummy_ok.sh` (`exit 0`) over `/bin/wd_pcdtest.sh` and `/etc/watchdog.d/wdtest.sh`. Write `0:700` into `/configs/uptime`.
-2. **Neutralize Airtel Remote ACS & Telemetry**:
-   Set `EnableCWMP` and `X_ALU-COM_TR369Agent_Enable` to `false` via `cfgcli`. Kill `nuspd`.
-3. **Disable EoGRE & Enable Standalone Routing**:
-   Disable `br_gre`. Enable kernel IPv4/IPv6 forwarding:
+---
+
+### B. Autonomous Master Unlock Daemon (`/configs/r7p.sh`)
+
+To permanently eliminate all 4 blocks across every reboot, [`/configs/r7p.sh`](file:///configs/r7p.sh) is registered as the first detector in [`/configs/aic_conf.json`](file:///configs/aic_conf.json):
+
+1. **Watchdog Neutralization**:
+   - Bind-mounts `/systemrw/dummy_ok.sh` (`exit 0`) over `/bin/wd_pcdtest.sh`, `/etc/watchdog.d/wdtest.sh`, `/bin/action_reboot.sh`, and `/bin/postaction.sh`.
+   - Constantly pads `/configs/uptime` with `0:700` intervals to disarm PCD rapid-reboot detection.
+2. **Hardware SIM Slot 1 Activation**:
    ```bash
-   echo 1 > /proc/sys/net/ipv4/ip_forward
-   echo 1 > /proc/sys/net/ipv6/conf/all/forwarding
+   exec 3<>/dev/smd11 2>/dev/null && {
+     echo -e "AT+QUIMSLOT=1\r" >&3
+     sleep 1
+     echo -e "AT+CFUN=1\r" >&3
+     sleep 0.5
+     exec 3>&-
+   }
    ```
-4. **NAT Masquerade & MSS Clamping**:
+3. **EoGRE Disarm & Kernel Forwarding**:
+   - Removes `eth0` from `br_gre` and attaches it to `bridge0`.
+   - Forces `echo 1 > /proc/sys/net/ipv4/ip_forward` and `echo 1 > /proc/sys/net/ipv6/conf/all/forwarding`.
+4. **Cellular Access Mode Lock (5G Standalone)**:
    ```bash
-   iptables -t nat -A POSTROUTING -o rmnet_data0 -j MASQUERADE
-   iptables -t nat -A POSTROUTING -o rmnet_data1 -j MASQUERADE
-   iptables -t mangle -A FORWARD -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --clamp-mss-to-pmtu
-   iptables -t mangle -A FORWARD -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --set-mss 1360
+   ubus call Nokia.GenericService SetCellularAccessConfig '{"originator":"admin","paralist":[{"AccessModeNo":3,"NetworkSlicingEnable":false}]}'
    ```
-5. **Boot Persistence**:
-   Incorporate into `/configs/aic_conf.json` so the unlock daemon starts automatically on every boot.
+   *(Mode 3 = Only 5G SA allowed, Band n78 / n28)*
+5. **Bidirectional NAT Masquerading & TCP MSS Clamping**:
+   - Masquerades outgoing traffic on active cellular WAN (`rmnet_data0` / `rmnet_data1`).
+   - Clamps TCP MSS to 1360 bytes to prevent GTP-U / 5G SA encapsulation fragmentation stalls.
+6. **Continuous Watchdog Self-Heal**:
+   - Runs in an infinite loop every 15 seconds. If the cellular connection drops, it automatically re-executes `AT+QUIMSLOT=1` and `AT+CFUN=1`.
 
 ---
 
