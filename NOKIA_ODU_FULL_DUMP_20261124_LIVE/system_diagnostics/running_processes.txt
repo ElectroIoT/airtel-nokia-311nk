@@ -1,0 +1,187 @@
+UID        PID  PPID  C STIME TTY          TIME CMD
+root         1     0  0 02:00 ?        00:00:10 /sbin/init
+root         2     0  0 02:00 ?        00:00:00 [kthreadd]
+root         3     2  0 02:00 ?        00:00:00 [rcu_gp]
+root         4     2  0 02:00 ?        00:00:00 [rcu_par_gp]
+root         6     2  0 02:00 ?        00:00:00 [kworker/0:0H-kblockd]
+root         7     2  0 02:00 ?        00:00:00 [kworker/u2:0+autosleep]
+root         8     2  0 02:00 ?        00:00:00 [mm_percpu_wq]
+root         9     2  0 02:00 ?        00:00:04 [ksoftirqd/0]
+root        10     2  0 02:00 ?        00:00:06 [rcu_preempt]
+root        11     2  0 02:00 ?        00:00:00 [kdevtmpfs]
+root        13     2  0 02:00 ?        00:00:00 [netns]
+root        14     2  0 02:00 ?        00:00:00 [rcu_tasks_kthre]
+root        15     2  0 02:00 ?        00:00:00 [qrtr_ns]
+root        17     2  0 02:00 ?        00:00:00 [msm-watchdog]
+root        19     2  0 02:00 ?        00:00:00 [qmp_aop]
+root        20     2  0 02:00 ?        00:00:00 [oom_reaper]
+root        21     2  0 02:00 ?        00:00:00 [writeback]
+root        22     2  0 02:00 ?        00:00:00 [kcompactd0]
+root        55     2  0 02:00 ?        00:00:00 [kblockd]
+root        56     2  0 02:00 ?        00:00:00 [irq/94-tsens-up]
+root        57     2  0 02:00 ?        00:00:00 [irq/95-tsens-cr]
+root        58     2  0 02:00 ?        00:00:00 [md]
+root        59     2  0 02:00 ?        00:00:00 [devfreq_wq]
+root        60     2  0 02:00 ?        00:00:00 [ipa_usb_wq]
+root        61     2  0 02:00 ?        00:00:00 [mpcie_wq]
+root        62     2  0 02:00 ?        00:00:00 [system]
+root        63     2  0 02:00 ?        00:00:00 [cfg80211]
+root        64     2  0 02:00 ?        00:00:03 [kswapd0:0]
+root        66     2  0 02:00 ?        00:00:00 [irq/34-smp2p]
+root        68     2  0 02:00 ?        00:00:00 [k_ipa_usb]
+root        69     2  0 02:00 ?        00:00:00 [irq/104-gpio_ke]
+root        71     2  0 02:00 ?        00:00:00 [dm_bufio_cache]
+root        72     2  0 02:00 ?        00:00:00 [qcrypto_seq_res]
+root        73     2  0 02:00 ?        00:00:00 [memlat_wq]
+root        74     2  0 02:00 ?        00:00:00 [irq/102-c440000]
+root        76     2  0 02:00 ?        00:00:00 [ipv6_addrconf]
+root        82     2  0 02:00 ?        00:00:00 [byte-cntr]
+root        83     2  0 02:00 ?        00:00:00 [etr_pcie]
+root        84     2  0 02:00 ?        00:00:00 [irq/101-qcom,te]
+root        85     2  0 02:00 ?        00:00:00 [irq/99-threshol]
+root        86     2  0 02:00 ?        00:00:00 [ipa_power_mgmt]
+root        87     2  0 02:00 ?        00:00:00 [transport_power]
+root        88     2  0 02:00 ?        00:00:00 [page_recycle_st]
+root        89     2  0 02:00 ?        00:00:00 [ipa_pm_activate]
+root        90     2  0 02:00 ?        00:00:00 [irq/42-arm-smmu]
+root        91     2  0 02:00 ?        00:00:00 [irq/50-arm-smmu]
+root        92     2  0 02:00 ?        00:00:00 [hwrng]
+root        93     2  0 02:00 ?        00:00:00 [qseecom-unreg-l]
+root        94     2  0 02:00 ?        00:00:00 [qseecom-unload-]
+root        95     2  0 02:00 ?        00:00:00 [irq/51-arm-smmu]
+root        96     2  0 02:00 ?        00:00:00 [irq/60-arm-smmu]
+root       117     2  0 02:00 ?        00:00:00 [irq/79-int_glob]
+root       118     2  0 02:00 ?        00:00:00 [irq/55-arm-smmu]
+root       119     2  0 02:00 ?        00:00:00 [irq/61-arm-smmu]
+root       120     2  0 02:00 ?        00:00:00 [irq/53-arm-smmu]
+root       121     2  0 02:00 ?        00:00:00 [irq/62-arm-smmu]
+root       122     2  0 02:00 ?        00:00:00 [irq/63-arm-smmu]
+root       123     2  0 02:00 ?        00:00:00 [irq/64-arm-smmu]
+root       124     2  0 02:00 ?        00:00:00 [ipa_interrupt_w]
+root       125     2  0 02:00 ?        00:00:00 [ipawq36]
+root       126     2  0 02:00 ?        00:00:00 [iparepwq36]
+root       127     2  0 02:00 ?        00:00:00 [ipawq33]
+root       128     2  0 02:00 ?        00:00:00 [iparepwq33]
+root       129     2  0 02:00 ?        00:00:00 [ipafreepagewq33]
+root       130     2  0 02:00 ?        00:00:00 [ipawq32]
+root       131     2  0 02:00 ?        00:00:00 [iparepwq32]
+root       133     2  0 02:00 ?        00:00:00 [ipa_ut_dbgfs]
+root       134     2  0 02:00 ?        00:00:00 [clnt_req]
+root       136     2  0 02:00 ?        00:00:00 [irq/59-arm-smmu]
+root       137     2  0 02:00 ?        00:00:00 [usb_bam_wq]
+root       138     2  0 02:00 ?        00:00:00 [irq/76-pwr_even]
+root       139     2  0 02:00 ?        00:00:00 [irq/75-dp_hs_ph]
+root       140     2  0 02:00 ?        00:00:00 [irq/78-dm_hs_ph]
+root       141     2  0 02:00 ?        00:00:00 [irq/77-ss_phy_i]
+root       143     2  0 02:00 ?        00:00:00 [ubi_bgt0d]
+root       144     2  0 02:00 ?        00:00:00 [ubi_bgt1d]
+root       145     2  0 02:00 ?        00:00:00 [kdmflush]
+root       146     2  0 02:00 ?        00:00:00 [kverityd]
+root       193     2  0 02:00 ?        00:00:00 [ubi_bgt2d]
+root       195     2  0 02:00 ?        00:00:01 [ubifs_bgt2_0]
+qrtr       218     1  0 02:00 ?        00:00:00 /usr/bin/qrtr-ns
+system     219     1  0 02:00 ?        00:00:00 /usr/bin/ssreq_server
+system     222     1  0 02:00 ?        00:00:00 /sbin/tftp_server
+root       236     1  0 02:00 ?        00:00:00 /lib/systemd/systemd-udevd
+logd       244     1  0 02:00 ?        00:00:00 /sbin/logd
+radio      249     1  0 02:00 ?        00:00:00 /usr/bin/netmgrd
+message+   258     1  0 02:00 ?        00:00:00 /usr/bin/dbus-daemon --config-file=/usr/share/dbus-1/system-local.conf --address=systemd: --nofork --nopidfile --systemd-activation --syslog-only
+radio      338     1  0 02:00 ?        00:00:02 /usr/bin/ipacm
+radio      339     1  0 02:00 ?        00:00:01 /usr/bin/QCMAP_ConnectionManager /etc/data/mobileap_cfg.xml d
+root       377     2  0 02:00 ?        00:00:00 [at_usb0]
+root       379     2  0 02:00 ?        00:00:00 [at_usb1]
+root       388     2  0 02:00 ?        00:00:00 [rmnet_ctrl]
+root       394     2  0 02:00 ?        00:00:00 [android_mbim]
+root       399     2  0 02:00 ?        00:00:00 [dpl_ctrl]
+root       402     2  0 02:00 ?        00:00:00 [gps]
+root       407     2  0 02:00 ?        00:00:00 [qdss]
+root       409     2  0 02:00 ?        00:00:00 [qdss_mdm]
+system     459     1  0 02:00 ?        00:00:00 /usr/bin/diag-router
+system     475     1  0 02:00 ?        00:00:00 /sbin/init_mss
+root       502     2  0 02:00 ?        00:00:00 [kworker/u3:15-qmi_msg_handler]
+root       505     2  0 02:00 ?        00:00:01 [kworker/u3:18-qmi_msg_handler]
+diag       512     1  0 02:00 ?        00:00:00 /usr/bin/diagrebootapp
+root       536     2  0 03:27 ?        00:00:00 [kworker/0:1-ubiblock0_0]
+radio      592     1  0 02:00 ?        00:00:00 /usr/bin/dnsmasq --conf-file=/var/run/data/dnsmasq.conf.bridge0 --user=radio --group=radio
+root       593   592  0 02:00 ?        00:00:00 /usr/bin/dnsmasq --conf-file=/var/run/data/dnsmasq.conf.bridge0 --user=radio --group=radio
+root       708     2  0 03:28 ?        00:00:01 [kworker/0:4-events]
+root       725     2  0 02:00 ?        00:00:00 [glink_modem]
+root       726     2  0 02:00 ?        00:00:00 [qrtr_rx]
+root       727     2  0 02:00 ?        00:00:00 [kworker/0:2H-kblockd]
+root       807     2  0 02:00 ?        00:00:00 [ipawq34]
+root       808     2  0 02:00 ?        00:00:00 [iparepwq34]
+root       809     2  0 02:00 ?        00:00:00 [ipawq128]
+root       810     2  0 02:00 ?        00:00:00 [iparepwq128]
+root       811     2  0 02:00 ?        00:00:00 [ipawq35]
+root       812     2  0 02:00 ?        00:00:00 [iparepwq35]
+root       813     2  0 02:00 ?        00:00:00 [ipafreepagewq35]
+root       851     1  0 02:00 ?        00:00:00 /usr/bin/usbd
+radio      853     1  0 02:00 ?        00:00:00 /usr/bin/atfwd_daemon
+radio      857     1  0 02:00 ?        00:00:00 /usr/bin/ipacmdiag
+radio      859     1  0 02:00 ?        00:00:00 /usr/bin/mbimd
+64371      862     1  0 02:00 ?        00:00:00 /sbin/ninfod -d
+root       863     1  0 02:00 ?        00:00:00 /sbin/procd
+61563      882     1  0 02:00 ?        00:00:00 /sbin/rdisc -f -t
+root       886     1  0 02:00 ?        00:00:00 /sbin/reboot-daemon
+system     888     1  0 02:00 ?        00:00:00 /usr/bin/servicemanager
+radio      903     1  0 02:00 ?        00:00:00 /usr/bin/port_bridge at_mdm0 at_usb0
+system     931     1  0 02:00 ?        00:00:00 /usr/bin/qseecomd
+radio      956     1  0 02:00 ?        00:00:00 /usr/bin/adpl
+root       983     1  0 02:00 ?        00:00:01 /usr/bin/qwesd
+radio      999     1  0 02:00 ?        00:00:00 /usr/bin/qti
+system    1040     1  0 02:00 ?        00:00:00 /usr/bin/thermal-engine
+root      1154     2  0 03:29 ?        00:00:00 [kworker/0:5-ubiblock0_0]
+root      1161     2  0 02:00 ?        00:00:00 [soc:qcom,ioss]
+root      1162     2  0 02:00 ?        00:00:00 [ipa_eth_wq]
+root      1380     2  0 02:00 ?        00:00:00 [ubi_bgt29d]
+root      1382     2  0 02:00 ?        00:00:00 [ubifs_bgt29_0]
+root      1969     2  0 03:31 ?        00:00:01 [kworker/u2:4-ipawq33]
+root      1970     2  0 03:31 ?        00:00:00 [kworker/u2:5-memlat_wq]
+root      2420   863  0 02:00 ?        00:00:00 /sbin/ubusd
+root      2474   863  0 02:00 ?        00:00:00 /bin/Aic
+root      2530   863  0 02:00 ?        00:00:00 /sbin/rpcd -s /var/run/ubus/ubus.sock -t 30
+root      2547     2  0 03:33 ?        00:00:00 [kworker/0:6-events]
+root      2575     1  0 02:00 ?        00:00:00 /usr/sbin/watchdog
+root      2824     1  0 02:00 ?        00:00:00 /bin/bash /bin/svlogd.sh -ttt /log/rmem
+root      2835     1  0 02:00 ?        00:00:05 /usr/sbin/pcd -v -f /etc/hb/all.pcd
+root      2859  2824  0 02:00 ?        00:00:00 /usr/sbin/svlogd -ttt /log/rmem
+root      3081  2835  0 02:00 ?        00:00:19 /usr/sbin/mosquitto -n -c /etc/mosquitto/mosquitto.conf
+root      3212  3629  0 03:35 ?        00:00:00 sleep 30
+root      3293  2835  0 02:00 ?        00:00:03 /usr/bin/ndbd --default=/etc/datamodel.db --dbfile=/configs/config_encryption.cfg --backup=/configs/config_encryption.cfg.bak --prepare=/usr/bin/cfgmgr_db_prepare --counter=/tmp/dmdb_save_counter --interval=60000
+root      3294  2835  0 02:00 ?        00:00:00 /usr/bin/CellularWanMgr
+root      3312 20435  8 03:35 ?        00:00:00 sshd-session: root [priv]
+root      3316  3312  0 03:35 ?        00:00:00 sshd-session: root@notty
+root      3321  3316 66 03:35 ?        00:00:00 ps -ef
+root      3322     1  0 03:35 ?        00:00:00 /sbin/agetty -n xterm
+root      3628  2835  0 02:00 ?        00:00:08 /usr/bin/cfgmgr
+root      3629  2835  0 02:00 ?        00:00:01 /bin/bash /bin/backuplog.sh
+root      3630  2835  0 02:00 ?        00:00:00 /usr/bin/syseventd
+root      3656     1  0 02:00 ?        00:00:00 /usr/bin/syseventd_fork_helper 11
+root      4436  2835  0 02:01 ?        00:00:00 /usr/bin/uva
+appServ+  4459  2835  0 02:01 ?        00:00:01 /usr/bin/obuspa -v 1 -r /usr/etc/tr369_conf/uspfactory_reset.conf -l syslog -t /configs/download/uspcontrollerCA.pem
+root      4460  2835  2 02:01 ?        00:02:08 /usr/bin/CtrlDeviceMgr
+root      4506  2835  2 02:01 ?        00:01:56 /usr/bin/BeaconMgr
+webServ+  5585  2835  0 02:01 ?        00:00:00 /webs/config/lighttpd -f /etc/hb/lighttpd.conf -m /webs/config/lib -D
+root      5894  2835  0 02:01 ?        00:00:00 /usr/bin/BTServer
+root      6085     1  0 02:01 ?        00:00:00 /sbin/syslogd -n -s 1500
+root      6092     1  0 02:01 ?        00:00:00 /sbin/klogd -n
+ntp       6093     1  0 02:01 ?        00:00:01 /usr/sbin/ntpd -u ntp:ntp -c /tmp/ntp.conf -p /run/ntpd.pid -g
+root      6481     1  0 02:02 ?        00:00:01 /bin/sh /configs/r7p.sh
+root      6519     1  0 02:02 ?        00:00:00 /bin/busybox telnetd -l /bin/sh
+root      7087     1  0 02:04 ?        00:00:01 /bin/sh /configs/r7p.sh
+root      8128     1  0 02:07 ?        00:00:01 /bin/sh /configs/r7p.sh
+root      9353     1  0 02:11 ?        00:00:00 sshd-session: root [priv]
+root      9358  9353  0 02:11 ?        00:00:04 sshd-session: root@pts/0
+root      9359  9358  0 02:11 pts/0    00:00:00 -bash
+root     10733     1  0 02:16 ?        00:00:01 /bin/sh /configs/r7p.sh
+root     16255     1  0 02:35 ?        00:00:00 /bin/sh /configs/r7p.sh
+root     20435     1  0 02:47 ?        00:00:01 sshd: /usr/sbin/sshd -p 22 -f /etc/ssh/sshd_config_ext [listener] 0 of 10-10 startups
+root     22434     1  0 02:54 ?        00:00:00 busybox httpd -p 8080 -h /
+root     24522     2  0 03:01 ?        00:00:04 [kworker/u2:2-memlat_wq]
+root     26446     2  0 03:07 ?        00:00:05 [kworker/u2:1-memlat_wq]
+root     27345     2  0 03:10 ?        00:00:05 [kworker/0:2-ubiblock0_0]
+root     27600     1  0 03:11 ?        00:00:00 /bin/sh /configs/r7p.sh
+root     27742  2835  0 03:11 ?        00:00:00 /usr/bin/nuspd
+root     31063     2  0 03:21 ?        00:00:01 [kworker/0:3-ubiblock0_0]
+root     32416     2  0 03:26 ?        00:00:01 [kworker/u2:3-kverityd]
+root     32728     2  0 03:26 ?        00:00:00 [kworker/0:0-ubiblock0_0]

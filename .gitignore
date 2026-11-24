@@ -14,3 +14,8 @@ usb_events.log
 
 # Private backup dumps
 *backup*.json
+
+# ODU Raw Images & Uncompressed Rootfs (preserve compressed archives & diagnostics)
+NOKIA_ODU_FULL_DUMP_20261124_LIVE/extracted_rootfs/
+NOKIA_ODU_FULL_DUMP_20261124_LIVE/raw_images/
+

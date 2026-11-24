@@ -1,0 +1,36 @@
+192.168.0.0/24 dev bridge0 proto kernel scope link src 192.168.0.1 
+broadcast 127.0.0.0 dev lo table local proto kernel scope link src 127.0.0.1 
+local 127.0.0.0/8 dev lo table local proto kernel scope host src 127.0.0.1 
+local 127.0.0.1 dev lo table local proto kernel scope host src 127.0.0.1 
+broadcast 127.255.255.255 dev lo table local proto kernel scope link src 127.0.0.1 
+broadcast 169.254.51.0 dev eth0 table local proto kernel scope link src 169.254.51.1 
+local 169.254.51.1 dev eth0 table local proto kernel scope host src 169.254.51.1 
+broadcast 169.254.51.255 dev eth0 table local proto kernel scope link src 169.254.51.1 
+broadcast 169.254.250.0 dev lo table local proto kernel scope link src 169.254.250.1 
+local 169.254.250.0/24 dev lo table local proto kernel scope host src 169.254.250.1 
+local 169.254.250.1 dev lo table local proto kernel scope host src 169.254.250.1 
+broadcast 169.254.250.255 dev lo table local proto kernel scope link src 169.254.250.1 
+broadcast 192.168.0.0 dev bridge0 table local proto kernel scope link src 192.168.0.1 
+local 192.168.0.1 dev bridge0 table local proto kernel scope host src 192.168.0.1 
+broadcast 192.168.0.255 dev bridge0 table local proto kernel scope link src 192.168.0.1 
+::1 dev lo proto kernel metric 256 pref medium
+fe80::/64 dev bridge0 proto kernel metric 256 pref medium
+fe80::/64 dev br_gre proto kernel metric 256 linkdown pref medium
+fe80::/64 dev eth0.1999 proto kernel metric 256 pref medium
+local ::1 dev lo table local proto kernel metric 0 pref medium
+anycast fe80:: dev bridge0 table local proto kernel metric 0 pref medium
+anycast fe80:: dev br_gre table local proto kernel metric 0 pref medium
+anycast fe80:: dev eth0.1999 table local proto kernel metric 0 pref medium
+anycast fe80:: dev eth0 table local proto kernel metric 0 pref medium
+local fe80::8b7:beff:fe19:5f59 dev br_gre table local proto kernel metric 0 pref medium
+local fe80::286a:ddff:fe1b:a955 dev bridge0 table local proto kernel metric 0 pref medium
+local fe80::5c44:46ff:fec8:43d dev eth0.1999 table local proto kernel metric 0 pref medium
+local fe80::c22e:1dff:fe0e:bbf9 dev eth0 table local proto kernel metric 0 pref medium
+multicast ff00::/8 dev bridge0 table local proto kernel metric 256 pref medium
+multicast ff00::/8 dev br_gre table local proto kernel metric 256 linkdown pref medium
+multicast ff00::/8 dev eth0.1999 table local proto kernel metric 256 pref medium
+multicast ff00::/8 dev eth0 table local proto kernel metric 256 pref medium
+---
+0:	from all lookup local
+32766:	from all lookup main
+32767:	from all lookup default

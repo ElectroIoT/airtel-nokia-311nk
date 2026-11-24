@@ -49,8 +49,9 @@ A standalone, all-in-one management, APN unlock, and 5G band-locking toolkit for
    - [7. Full Configuration Backup Export](#7-full-configuration-backup-export)
    - [8. Remote Clean Reboot](#8-remote-clean-reboot)
 7. [The Physical SIM (Jio) Reboot Issue Explained](#-the-physical-sim-jio-reboot-issue-explained)
-8. [Security & Privacy](#-security--privacy)
-9. [Author & Credits](#-author--credits)
+8. [ODU Architecture & TR-181 Workflow Deep-Dive](#-odu-architecture--tr-181-workflow-deep-dive)
+9. [Security & Privacy](#-security--privacy)
+10. [Author & Credits](#-author--credits)
 
 ---
 
@@ -306,6 +307,23 @@ GetCellularNetworkIdentification: getESIMProfilesObject find esim profile, iccid
 3. This interrupt forces the Qualcomm modem baseband to handle a **"SIM State Change"**, switching the active slot from eSIM to the external **USIM slot**, latching onto Jio!
 
 > **Tip:** Once locked to `apnctl n78` with APN `jionet`, the ODU maintains a persistent 5G SA latch on Band n78.
+
+---
+
+## 🔬 ODU Architecture & TR-181 Workflow Deep-Dive
+
+For a complete architectural breakdown, partition structure, reverse-engineered TR-181 data models, and VLAN flow analysis, see the dedicated reference:
+👉 **[Nokia FastMile 5G ODU Architecture & TR-181 Workflow Deep-Dive (docs/NOKIA_5G_ODU_ARCHITECTURE_AND_TR181_WORKFLOW.md)](docs/NOKIA_5G_ODU_ARCHITECTURE_AND_TR181_WORKFLOW.md)**
+
+### Key Technical Findings:
+* **Hardware & Kernel:** Qualcomm Snapdragon X65 (`sdxlemur`, ARM Cortex-A7 @ 1.0 GHz), Linux Kernel `5.4.289` PREEMPT, Realtek RTL8168 PCIe 2.5G/1G NIC (`r8168_ioss`) with Qualcomm IP Accelerator (`IPA`).
+* **Storage & Partitions:** SquashFS dm-verity read-only rootfs (`/dev/ubiblock0_0`, 75MB), DSP modem firmware (`/dev/ubiblock1_0`, 81MB), persistent UBIFS `/configs` (8MB) & `/systemrw` (30MB).
+* **Nokia PCD Supervisor:** Managed by `/bin/pcd` through `/etc/hb/*.pcd` dependency chains (`prepare` ➔ `SysEvent` ➔ `MQTT` ➔ `CfgMgr` ➔ `CellularMgr` ➔ `TR069Agent` / `obuspa`).
+* **Dual-Plane Ethernet Architecture:**
+  - **VLAN 1999 (OAM Management):** Static `192.168.0.1/24` on `bridge0` exposing local Web UI (80/443), SSH (22), and Telnet (23).
+  - **VLAN 1081 (Airtel User Traffic):** Enforces Layer-2 Ethernet-over-GRE (`L2 EoGRE`) encapsulation directly to the Airtel IDU/Core.
+* **Dual Cellular APNs:** Dedicated **APN 1** (`rmnet_data0`) for OAM/TR-069 ACS management vs **APN 2** (`rmnet_data1`) for high-speed subscriber 5G data.
+* **Live System Backup & Dumps:** Component archives (25MB `.tar.gz`) and decrypted 1MB TR-181 tree dumps available in [`NOKIA_ODU_FULL_DUMP_20261124_LIVE/`](NOKIA_ODU_FULL_DUMP_20261124_LIVE/).
 
 ---
 

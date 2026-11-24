@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nokia FastMile 5G ODU (AOD311NK / 5G32-A) - Executive Technical Systems & Reverse Engineering Report</title>
+  <style>
+    :root {
+      --bg-body: #090d16;
+      --bg-surface: #0f172a;
+      --bg-card: #1e293b;
+      --bg-card-hover: #27354f;
+      --bg-code: #0b1120;
+      --border-subtle: #24344d;
+      --border-focus: #38bdf8;
+      
+      --accent-cyan: #06b6d4;
+      --accent-blue: #38bdf8;
+      --accent-emerald: #10b981;
+      --accent-amber: #f59e0b;
+      --accent-rose: #f43f5e;
+      --accent-purple: #a855f7;
+      
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --text-dim: #64748b;
+      
+      --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: var(--bg-body);
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      line-height: 1.6;
+      padding: 32px 24px;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .container {
+      max-width: 1480px;
+      margin: 0 auto;
+    }
+
+    /* Header styling */
+    header {
+      background: linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(30, 41, 59, 0.8));
+      border: 1px solid var(--border-subtle);
+      border-radius: 16px;
+      padding: 32px;
+      margin-bottom: 28px;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+      position: relative;
+      overflow: hidden;
+    }
+    header::before {
+      content: "";
+      position: absolute;
+      top: 0; left: 0; right: 0; height: 3px;
+      background: linear-gradient(90deg, var(--accent-cyan), var(--accent-blue), var(--accent-purple));
+    }
+
+    .header-top {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+    .badge-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 9999px;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+    .badge-emerald { background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(52, 211, 153, 0.3); }
+    .badge-cyan { background: rgba(6, 182, 212, 0.15); color: #22d3ee; border: 1px solid rgba(34, 211, 238, 0.3); }
+    .badge-purple { background: rgba(168, 85, 247, 0.15); color: #c084fc; border: 1px solid rgba(192, 132, 252, 0.3); }
+
+    h1 {
+      font-size: 32px;
+      font-weight: 800;
+      color: #fff;
+      letter-spacing: -0.5px;
+      margin-bottom: 8px;
+    }
+    .subtitle {
+      color: var(--text-muted);
+      font-size: 16px;
+      max-width: 900px;
+    }
+
+    /* Grid telemetry strip */
+    .telemetry-strip {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-top: 24px;
+      padding-top: 20px;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .tele-card {
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 10px;
+      padding: 12px 16px;
+    }
+    .tele-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: var(--text-dim);
+      margin-bottom: 4px;
+    }
+    .tele-value {
+      font-family: var(--font-mono);
+      font-size: 14px;
+      font-weight: 700;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background-color: var(--accent-emerald);
+      box-shadow: 0 0 8px var(--accent-emerald);
+    }
+
+    /* Tab navigation */
+    .nav-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 24px;
+      overflow-x: auto;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    .tab-btn {
+      background: var(--bg-surface);
+      color: var(--text-muted);
+      border: 1px solid var(--border-subtle);
+      padding: 10px 20px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .tab-btn:hover {
+      background: var(--bg-card);
+      color: #fff;
+      border-color: var(--accent-blue);
+    }
+    .tab-btn.active {
+      background: linear-gradient(135deg, rgba(6, 182, 212, 0.15), rgba(56, 189, 248, 0.2));
+      color: var(--accent-cyan);
+      border-color: var(--accent-cyan);
+      box-shadow: 0 0 15px rgba(6, 182, 212, 0.2);
+    }
+
+    /* Content Panes */
+    .tab-pane {
+      display: none;
+      animation: fadeIn 0.3s ease forwards;
+    }
+    .tab-pane.active {
+      display: block;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Panels & Sections */
+    .section-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 14px;
+      padding: 28px;
+      margin-bottom: 24px;
+    }
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    .section-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    /* Responsive grid layouts */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(480px, 1fr));
+      gap: 24px;
+    }
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 20px;
+    }
+
+    /* Tables */
+    .data-table-wrapper {
+      overflow-x: auto;
+      border-radius: 10px;
+      border: 1px solid var(--border-subtle);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      text-align: left;
+    }
+    th {
+      background: var(--bg-card);
+      color: var(--text-muted);
+      font-weight: 600;
+      padding: 12px 16px;
+      text-transform: uppercase;
+      font-size: 11px;
+      letter-spacing: 0.5px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    td {
+      padding: 12px 16px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      color: var(--text-main);
+    }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: rgba(255, 255, 255, 0.02); }
+
+    /* Code blocks */
+    pre {
+      background-color: var(--bg-code);
+      border: 1px solid var(--border-subtle);
+      border-radius: 10px;
+      padding: 16px;
+      overflow-x: auto;
+      font-family: var(--font-mono);
+      font-size: 13px;
+      color: #e2e8f0;
+      line-height: 1.5;
+      margin: 12px 0;
+      position: relative;
+    }
+    code {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      color: var(--accent-blue);
+      background: rgba(56, 189, 248, 0.1);
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+    pre code {
+      color: inherit;
+      background: none;
+      padding: 0;
+    }
+
+    /* Callout Alert Boxes */
+    .callout {
+      border-left: 4px solid var(--accent-blue);
+      background: rgba(56, 189, 248, 0.08);
+      border-radius: 0 8px 8px 0;
+      padding: 16px 20px;
+      margin: 16px 0;
+      font-size: 14px;
+    }
+    .callout-success { border-left-color: var(--accent-emerald); background: rgba(16, 185, 129, 0.08); }
+    .callout-warning { border-left-color: var(--accent-amber); background: rgba(245, 158, 11, 0.08); }
+    .callout-danger { border-left-color: var(--accent-rose); background: rgba(244, 63, 94, 0.08); }
+
+    /* SVG Architecture Visualizers */
+    .diagram-container {
+      background: var(--bg-code);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      padding: 20px;
+      margin: 16px 0;
+      display: flex;
+      justify-content: center;
+    }
+    svg {
+      max-width: 100%;
+      height: auto;
+    }
+
+    /* Print styling */
+    @media print {
+      body { background: #fff; color: #000; padding: 0; }
+      header, .section-card { box-shadow: none; border-color: #ccc; }
+      .nav-tabs { display: none; }
+      .tab-pane { display: block !important; margin-bottom: 30px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- HEADER COMPONENT -->
+  <header>
+    <div class="header-top">
+      <div>
+        <div style="display: flex; gap: 8px; margin-bottom: 12px;">
+          <span class="badge-pill badge-emerald"><span class="status-dot"></span> Live 5G SA Connected</span>
+          <span class="badge-pill badge-cyan">Qualcomm Snapdragon X65</span>
+          <span class="badge-pill badge-purple">Nokia 5G32-A / AOD311NK</span>
+        </div>
+        <h1>Nokia FastMile 5G ODU: Engineering & Reverse Analysis</h1>
+        <p class="subtitle">Complete technical systems evaluation, binary reverse engineering, Qualcomm baseband architecture, dm-verity bypass, and Reliance Jio 5G SA network integration report.</p>
+      </div>
+      <div style="text-align: right;">
+        <p style="font-size: 12px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.5px;">Target Firmware Build</p>
+        <p style="font-family: var(--font-mono); font-size: 14px; color: var(--accent-blue); font-weight: 700;">AOD311NK_R6.0 (Active Slot A)</p>
+        <p style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">Kernel: Linux 5.4.289 PREEMPT armv7l</p>
+      </div>
+    </div>
+
+    <!-- LIVE TELEMETRY STRIP -->
+    <div class="telemetry-strip">
+      <div class="tele-card">
+        <div class="tele-label">Active Carrier</div>
+        <div class="tele-value" style="color: #38bdf8;">Reliance Jio (405862)</div>
+      </div>
+      <div class="tele-card">
+        <div class="tele-label">Cellular Mode</div>
+        <div class="tele-value" style="color: #34d399;">5G Standalone (SA)</div>
+      </div>
+      <div class="tele-card">
+        <div class="tele-label">WAN Interface</div>
+        <div class="tele-value">rmnet_data1 <span class="badge-pill badge-emerald" style="padding: 2px 8px; font-size: 10px;">UP</span></div>
+      </div>
+      <div class="tele-card">
+        <div class="tele-label">Global IPv6 Prefix</div>
+        <div class="tele-value" style="font-size: 12px;">2409:40f3:200d:97ee::/64</div>
+      </div>
+      <div class="tele-card">
+        <div class="tele-label">Ping Latency</div>
+        <div class="tele-value" style="color: #a855f7;">39.4 ms (0% Loss)</div>
+      </div>
+      <div class="tele-card">
+        <div class="tele-label">Watchdogs & PCD</div>
+        <div class="tele-value" style="color: #f59e0b;">Neutralized (VFS Stub)</div>
+      </div>
+    </div>
+  </header>
+
+  <!-- NAVIGATION TABS -->
+  <div class="nav-tabs">
+    <button class="tab-btn active" onclick="openTab(event, 'tab-overview')">📌 Executive Summary</button>
+    <button class="tab-btn" onclick="openTab(event, 'tab-hardware')">⚡ Hardware & MTD Flash</button>
+    <button class="tab-btn" onclick="openTab(event, 'tab-re')">🔬 Binary RE & 5RDP Decrypt</button>
+    <button class="tab-btn" onclick="openTab(event, 'tab-datapath')">📡 Jio 5G & EoGRE Bypass</button>
+    <button class="tab-btn" onclick="openTab(event, 'tab-watchdog')">🛡️ Watchdog & PCD Neutralization</button>
+    <button class="tab-btn" onclick="openTab(event, 'tab-lan')">🔌 LAN Bridge & Routing Fix</button>
+    <button class="tab-btn" onclick="openTab(event, 'tab-deploy')">💻 Automation Script</button>
+  </div>
+
+  <!-- TAB 1: EXECUTIVE SUMMARY -->
+  <div id="tab-overview" class="tab-pane active">
+    <div class="section-card">
+      <div class="section-header">
+        <h2 class="section-title">Executive Summary & Operational Milestone</h2>
+        <span class="badge-pill badge-emerald">Field Deployment Ready</span>
+      </div>
+      <p style="margin-bottom: 16px;">
+        The Nokia FastMile 5G Receiver Outdoor Unit (ODU Model: <code>5G32-A</code> / Board: <code>AOD311NK</code>) has been successfully reverse engineered, unlocked from carrier restrictions, and operationalized on <strong>Reliance Jio True5G (5G Standalone SA)</strong>. The system provides sustained high-bandwidth, ultra-low latency routing directly to any client device or commercial Wi-Fi router.
+      </p>
+
+      <div class="grid-3" style="margin-top: 20px;">
+        <div class="tele-card" style="padding: 20px;">
+          <h3 style="color: var(--accent-cyan); margin-bottom: 8px;">1. Carrier Lock Eradicated</h3>
+          <p style="font-size: 13px; color: var(--text-muted);">
+            Stock Airtel firmware hardwired Qualcomm QCMAP to Ethernet-over-GRE (<code>br_gre</code>) tunnel, silently dropping all cellular packets on non-Airtel carriers. Bypassed via persistent XML profiles and WWAN priority routing.
+          </p>
+        </div>
+        <div class="tele-card" style="padding: 20px;">
+          <h3 style="color: var(--accent-emerald); margin-bottom: 8px;">2. Hardware Watchdogs Disarmed</h3>
+          <p style="font-size: 13px; color: var(--text-muted);">
+            Linux hardware watchdog (<code>/dev/watchdog1</code>) and PCD reboot triggers (forcing hard resets at 300s) neutralized via VFS bind-mount virtualization, keeping SquashFS rootfs 100% untouched and dm-verity compliant.
+          </p>
+        </div>
+        <div class="tele-card" style="padding: 20px;">
+          <h3 style="color: var(--accent-purple); margin-bottom: 8px;">3. Reliance Jio 5G SA Live</h3>
+          <p style="font-size: 13px; color: var(--text-muted);">
+            Integrated native pure IPv6 single-stack PDN (<code>2409:40f3:...</code>) with carrier 464XLAT and Netfilter NAT masquerading. Achieved sub-40ms latency with 0% packet loss to Google services.
+          </p>
+        </div>
+      </div>
+
+      <div class="callout callout-success" style="margin-top: 24px;">
+        <strong>Verified Live Connectivity:</strong> The device is actively booted in <strong>Slot A</strong> running firmware <code>AOD311NK_R6.0</code>. Root access is permanently accessible over SSH port 22 and Telnet port 23. Egress cellular packets successfully route through the Qualcomm IP Accelerator (IPA) on <code>rmnet_data1</code>.
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 2: HARDWARE & MTD FLASH ARCHITECTURE -->
+  <div id="tab-hardware" class="tab-pane">
+    <div class="section-card">
+      <div class="section-header">
+        <h2 class="section-title">Hardware Architecture & Dual-Slot MTD/UBI Layout</h2>
+        <span class="badge-pill badge-cyan">Micron 1GB SLC NAND</span>
+      </div>
+
+      <p style="margin-bottom: 20px;">
+        The ODU is architected around the <strong>Qualcomm Snapdragon X65 5G Modem-RF System (<code>sdxlemur</code>)</strong> featuring an ARM Cortex-A7 embedded application processor and Hexagon DSP modem baseband. Storage is backed by a 1GB raw SLC NAND divided across 38 MTD hardware blocks.
+      </p>
+
+      <!-- SVG ARCHITECTURE DIAGRAM -->
+      <div class="diagram-container">
+        <svg width="1000" height="340" viewBox="0 0 1000 340" xmlns="http://www.w3.org/2000/svg">
+          <!-- Background Box -->
+          <rect x="10" y="10" width="980" height="320" rx="12" fill="#0f172a" stroke="#24344d" stroke-width="2"/>
+          
+          <!-- Qualcomm SoC Core -->
+          <rect x="30" y="30" width="940" height="70" rx="8" fill="#1e293b" stroke="#38bdf8" stroke-width="1.5"/>
+          <text x="500" y="60" fill="#38bdf8" font-size="16" font-weight="700" text-anchor="middle" font-family="sans-serif">Qualcomm Snapdragon X65 (sdxlemur) - 3GPP Rel 16 Baseband & ARMv7 Host</text>
+          <text x="500" y="82" fill="#94a3b8" font-size="12" text-anchor="middle" font-family="monospace">Qualcomm IP Accelerator (IPA v4.5+) | SMD / QMI IPC (/dev/smd11) | Linux Kernel 5.4.289 PREEMPT</text>
+
+          <!-- Slot A Box -->
+          <rect x="30" y="125" width="455" height="110" rx="8" fill="#1e293b" stroke="#10b981" stroke-width="1.5"/>
+          <text x="257" y="150" fill="#34d399" font-size="15" font-weight="700" text-anchor="middle" font-family="sans-serif">Slot A: Active Operational Slot (R6.0 / R7.0)</text>
+          <text x="50" y="175" fill="#e2e8f0" font-size="12" font-family="monospace">- mtd17: a_boot   (Linux zImage + Device Tree Blob)</text>
+          <text x="50" y="195" fill="#e2e8f0" font-size="12" font-family="monospace">- mtd21: a_modem  (Hexagon DSP Modem Firmware / NVRAM)</text>
+          <text x="50" y="215" fill="#e2e8f0" font-size="12" font-family="monospace">- mtd33: a_system (SquashFS Rootfs wrapped with dm-verity)</text>
+
+          <!-- Slot B Box -->
+          <rect x="515" y="125" width="455" height="110" rx="8" fill="#1e293b" stroke="#64748b" stroke-width="1.5"/>
+          <text x="742" y="150" fill="#94a3b8" font-size="15" font-weight="700" text-anchor="middle" font-family="sans-serif">Slot B: Standby Rescue Image (R5.0 Stock)</text>
+          <text x="535" y="175" fill="#94a3b8" font-size="12" font-family="monospace">- mtd18: b_boot   (Secondary Kernel zImage + DTB)</text>
+          <text x="535" y="195" fill="#94a3b8" font-size="12" font-family="monospace">- mtd22: b_modem  (Secondary DSP Baseband Code)</text>
+          <text x="535" y="215" fill="#94a3b8" font-size="12" font-family="monospace">- mtd34: b_system (Secondary SquashFS System)</text>
+
+          <!-- Shared UBIFS Partitions -->
+          <rect x="30" y="255" width="940" height="55" rx="8" fill="#1e293b" stroke="#a855f7" stroke-width="1.5"/>
+          <text x="500" y="278" fill="#c084fc" font-size="14" font-weight="700" text-anchor="middle" font-family="sans-serif">Shared Persistent Volumes (UBIFS Flash)</text>
+          <text x="500" y="298" fill="#cbd5e1" font-size="12" text-anchor="middle" font-family="monospace">mtd24: persist (RF Cal/IMEI) | mtd35: /configs (UBIFS - aic_conf.json) | mtd36: /systemrw (UBIFS Overlays) | mtd37: /data</text>
+        </svg>
+      </div>
+
+      <div class="data-table-wrapper" style="margin-top: 20px;">
+        <table>
+          <thead>
+            <tr>
+              <th>Partition</th>
+              <th>MTD Node</th>
+              <th>Filesystem / Format</th>
+              <th>Mount Target</th>
+              <th>Security / Integrity Role</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>a_boot</strong></td>
+              <td><code>/dev/mtd17</code></td>
+              <td>Raw Kernel zImage + DTB</td>
+              <td>N/A (Boot RAM)</td>
+              <td>Parsed by U-Boot; SBL signature validation</td>
+            </tr>
+            <tr>
+              <td><strong>a_modem</strong></td>
+              <td><code>/dev/mtd21</code></td>
+              <td>Qualcomm NON-HLOS</td>
+              <td>Firmware Subsystem</td>
+              <td>Hexagon DSP code; Qualcomm TrustZone verified</td>
+            </tr>
+            <tr>
+              <td><strong>a_system</strong></td>
+              <td><code>/dev/mtd33</code></td>
+              <td>SquashFS (Read-Only)</td>
+              <td><code>/dev/dm-0</code> on <code>/</code></td>
+              <td>Protected by SHA-256 Merkle tree (dm-verity)</td>
+            </tr>
+            <tr>
+              <td><strong>configs</strong></td>
+              <td><code>/dev/mtd35</code></td>
+              <td>UBIFS (Read-Write)</td>
+              <td><code>/configs</code> (noexec)</td>
+              <td>Stores <code>aic_conf.json</code>, <code>mobileap_cfg.xml</code>, certificates</td>
+            </tr>
+            <tr>
+              <td><strong>systemrw</strong></td>
+              <td><code>/dev/mtd36</code></td>
+              <td>UBIFS (Read-Write)</td>
+              <td><code>/systemrw</code></td>
+              <td>Persistent scratchpad; stores <code>dummy_ok.sh</code> bind-mount stub</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 3: BINARY RE & 5RDP -->
+  <div id="tab-re" class="tab-pane">
+    <div class="section-card">
+      <div class="section-header">
+        <h2 class="section-title">Binary Reverse Engineering & 5RDP Container Decryption</h2>
+        <span class="badge-pill badge-purple">Cryptographic Pipeline</span>
+      </div>
+
+      <div class="grid-2">
+        <div>
+          <h3 style="color: var(--accent-blue); margin-bottom: 10px;">The 5RDP Container Format</h3>
+          <p style="font-size: 14px; color: var(--text-muted); margin-bottom: 12px;">
+            Nokia firmware archives (such as <code>AOD311NK_R6.0.bin</code>) are encrypted container images. The container begins with a 256-byte header:
+          </p>
+          <pre><code>Offset 0x00: 52 44 50 35 ("5RDP" Magic Identifier)
+Offset 0x04: Target Hardware String ("AOD311NK" / "5G32-A")
+Offset 0x18: 16-Byte AES Initialization Vector (IV)
+Offset 0x28: SHA-256 Digest of Decrypted Partition Table
+Offset 0x48: Encrypted Partition Payloads (AES-128/256-CBC)</code></pre>
+        </div>
+
+        <div>
+          <h3 style="color: var(--accent-blue); margin-bottom: 10px;">The BATIDecrypt Decompilation Overview</h3>
+          <p style="font-size: 14px; color: var(--text-muted); margin-bottom: 12px;">
+            <code>/usr/bin/BATIDecrypt</code> reads standard input, parses the container manifest, retrieves the on-chip platform key, and performs cryptographic streaming:
+          </p>
+          <pre><code>int main(int argc, char **argv) {
+    if (read(0, &hdr, sizeof(hdr)) < 256) exit(1);
+    if (memcmp(hdr.magic, "5RDP", 4) != 0) exit(0x10);
+    // Derive key from platform hardware ID
+    EVP_DecryptInit_ex(ctx, EVP_aes_128_cbc(), NULL, key, hdr.iv);
+    while ((n = read(0, in_buf, 4096)) > 0) {
+        EVP_DecryptUpdate(ctx, out_buf, &out_len, in_buf, n);
+        write(1, out_buf, out_len); // Pipes to /bin/burn
+    }
+}</code></pre>
+        </div>
+      </div>
+
+      <div class="callout callout-warning" style="margin-top: 20px;">
+        <strong>Zero-Disk-Space Flashing Stream:</strong> The device contains insufficient free RAM to store a 200MB+ firmware binary in <code>/tmp</code>. The update is performed via a streaming HTTP pipeline directly into the flash writer:
+        <pre><code>wget -O- http://192.168.0.150:8088/AOD311NK_R6.0.bin | /bin/burn a</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 4: CELLULAR DATAPATH & JIO 5G SA -->
+  <div id="tab-datapath" class="tab-pane">
+    <div class="section-card">
+      <div class="section-header">
+        <h2 class="section-title">Cellular Datapath Architecture & EoGRE Tunnel Bypass</h2>
+        <span class="badge-pill badge-emerald">Reliance Jio True5G (SA)</span>
+      </div>
+
+      <p style="margin-bottom: 20px;">
+        The stock firmware implements carrier locking via Qualcomm's <code>QCMAP_ConnectionManager</code>. By forcing cellular traffic into an Ethernet-over-GRE (EoGRE) tunnel destined for Airtel BNG routers, non-Airtel carriers suffer 100% packet loss.
+      </p>
+
+      <!-- SVG DATAPATH COMPARISON -->
+      <div class="diagram-container">
+        <svg width="1000" height="260" viewBox="0 0 1000 260" xmlns="http://www.w3.org/2000/svg">
+          <rect x="10" y="10" width="980" height="240" rx="12" fill="#0f172a" stroke="#24344d" stroke-width="2"/>
+          
+          <!-- Stock Box -->
+          <rect x="30" y="30" width="455" height="200" rx="8" fill="#1e293b" stroke="#f43f5e" stroke-width="1.5"/>
+          <text x="257" y="55" fill="#fb7185" font-size="15" font-weight="700" text-anchor="middle" font-family="sans-serif">Stock Airtel Configuration (EoGRE Locked)</text>
+          <text x="50" y="85" fill="#fca5a5" font-size="12" font-family="monospace">&lt;EoGREProfile1&gt;1&lt;/EoGREProfile1&gt;</text>
+          <text x="50" y="105" fill="#fca5a5" font-size="12" font-family="monospace">&lt;EoGRENonTunneledTraffic&gt;0&lt;/EoGRENonTunneledTraffic&gt;</text>
+          <text x="50" y="125" fill="#fca5a5" font-size="12" font-family="monospace">APN: airtelfwamdu.com</text>
+          <line x1="50" y1="145" x2="465" y2="145" stroke="#f43f5e" stroke-dasharray="4"/>
+          <text x="257" y="175" fill="#f87171" font-size="12" text-anchor="middle" font-weight="600">Enforces gretap2 / br_gre tunnel encapsulation</text>
+          <text x="257" y="200" fill="#fca5a5" font-size="13" text-anchor="middle" font-weight="700">❌ Alien SIM (Jio): 100% Packet Drop by rmnet_ipa</text>
+
+          <!-- Unlocked Box -->
+          <rect x="515" y="30" width="455" height="200" rx="8" fill="#1e293b" stroke="#10b981" stroke-width="1.5"/>
+          <text x="742" y="55" fill="#34d399" font-size="15" font-weight="700" text-anchor="middle" font-family="sans-serif">Re-engineered Datapath (Carrier Unlocked)</text>
+          <text x="535" y="85" fill="#6ee7b7" font-size="12" font-family="monospace">&lt;EoGREProfile1&gt;0&lt;/EoGREProfile1&gt;</text>
+          <text x="535" y="105" fill="#6ee7b7" font-size="12" font-family="monospace">&lt;EoGRENonTunneledTraffic&gt;1&lt;/EoGRENonTunneledTraffic&gt;</text>
+          <text x="535" y="125" fill="#6ee7b7" font-size="12" font-family="monospace">APN: jionet (FirstPreferredBackhaul: wwan)</text>
+          <line x1="535" y1="145" x2="950" y2="145" stroke="#10b981" stroke-dasharray="4"/>
+          <text x="742" y="175" fill="#34d399" font-size="12" text-anchor="middle" font-weight="600">Routes straight to rmnet_data1 + NAT Masquerade</text>
+          <text x="742" y="200" fill="#a7f3d0" font-size="13" text-anchor="middle" font-weight="700">✅ Jio True5G (SA): Native Pure IPv6 / 464XLAT Live</text>
+        </svg>
+      </div>
+
+      <div class="grid-2" style="margin-top: 20px;">
+        <div>
+          <h3 style="color: var(--accent-blue); margin-bottom: 8px;">Dotted-Decimal IPv6 Decoding</h3>
+          <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 10px;">
+            Qualcomm SDXlemur character interfaces (<code>/dev/smd11</code>) return IPv6 addresses as 16 decimal octets:
+          </p>
+          <pre><code>+CGPADDR: 1,"36.9.64.243.32.13.151.238.128.0.0.0.0.0.0.0"
+- 36.9.64.243 -> 0x24 0x09 0x40 0xF3
+- 32.13.151.238 -> 0x20 0x0D 0x97 0xEE
+Full IPv6 Prefix: 2409:40f3:200d:97ee:8000::/64</code></pre>
+        </div>
+        <div>
+          <h3 style="color: var(--accent-blue); margin-bottom: 8px;">TCP MSS Clamping (PMTU Optimization)</h3>
+          <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 10px;">
+            5G SA GTP-U encapsulation reduces the link MTU to 1420-1400 bytes. Netfilter clamping eliminates TLS handshake drop:
+          </p>
+          <pre><code>iptables -t mangle -A FORWARD -p tcp --tcp-flags SYN,RST SYN \
+  -j TCPMSS --clamp-mss-to-pmtu
+iptables -t mangle -A FORWARD -p tcp --tcp-flags SYN,RST SYN \
+  -j TCPMSS --set-mss 1360
+ip6tables -t mangle -A FORWARD -p tcp --tcp-flags SYN,RST SYN \
+  -j TCPMSS --set-mss 1340</code></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 5: WATCHDOG & PCD NEUTRALIZATION -->
+  <div id="tab-watchdog" class="tab-pane">
+    <div class="section-card">
+      <div class="section-header">
+        <h2 class="section-title">Watchdog Supervision & VFS Bind-Mount Virtualization</h2>
+        <span class="badge-pill badge-amber">Non-Destructive Override</span>
+      </div>
+
+      <p style="margin-bottom: 16px;">
+        To stop the 300-second hardware reset and PCD short-boot lockout <strong>without modifying the dm-verity protected rootfs</strong>, we use Linux Virtual File System (VFS) in-memory mount redirection:
+      </p>
+
+      <div class="grid-2">
+        <div>
+          <h3 style="color: var(--accent-blue); margin-bottom: 10px;">The Supervision Trap</h3>
+          <ul style="font-size: 13px; color: var(--text-muted); line-height: 1.8; margin-left: 20px;">
+            <li><strong>Hardware Watchdog (<code>/dev/watchdog1</code>):</strong> Supervised by <code>wd_pcdtest.sh</code> and <code>wdtest.sh</code>. Trips after 300 seconds if unpetted.</li>
+            <li><strong>PCD Deadman Daemon:</strong> If Airtel IMS/ACS is unreachable, <code>postaction.sh</code> triggers an emergency reset (<code>reboot -f</code>).</li>
+            <li><strong>Rapid Reboot Counter (<code>/configs/uptime</code>):</strong> If 3 boots occur with uptime under 700s, the bootloader triggers an automatic slot flip.</li>
+          </ul>
+        </div>
+        <div>
+          <h3 style="color: var(--accent-emerald); margin-bottom: 10px;">The Non-Destructive Resolution</h3>
+          <pre><code># 1. Persistent neutral success stub on UBIFS
+cat << 'EOF' > /systemrw/dummy_ok.sh
+#!/bin/sh
+exit 0
+EOF
+chmod 755 /systemrw/dummy_ok.sh
+
+# 2. Bind mount over all reboot scripts
+mount --bind /systemrw/dummy_ok.sh /bin/wd_pcdtest.sh
+mount --bind /systemrw/dummy_ok.sh /etc/watchdog.d/wdtest.sh
+mount --bind /systemrw/dummy_ok.sh /bin/postaction.sh
+
+# 3. Disarm rapid reboot tracker in flash
+printf '0:700\n0:700\n0:700\n0:700\n0:700\n' > /configs/uptime</code></pre>
+        </div>
+      </div>
+
+      <div class="callout callout-success" style="margin-top: 20px;">
+        <strong>Zero dm-verity Conflict:</strong> Because <code>mount --bind</code> operates purely at the in-memory Linux VFS dentry layer, the physical SquashFS blocks on <code>mtd33</code> remain completely unmodified. The kernel Merkle tree matches 100%, preventing integrity panics.
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 6: LAN BRIDGE & ROUTING FIX -->
+  <div id="tab-lan" class="tab-pane">
+    <div class="section-card">
+      <div class="section-header">
+        <h2 class="section-title">LAN Bridge Datapath & Kernel Forwarding Diagnostic Breakdown</h2>
+        <span class="badge-pill badge-cyan">Root-Cause Resolution</span>
+      </div>
+
+      <p style="margin-bottom: 16px;">
+        When the ODU itself was connected to the internet, client laptops plugged into the Ethernet port initially reported <code>Network is unreachable</code>. Deep-packet tracing via REA uncovered two distinct network barriers:
+      </p>
+
+      <div class="grid-2">
+        <div class="tele-card" style="padding: 20px;">
+          <h3 style="color: var(--accent-rose); margin-bottom: 8px;">Barrier 1: Per-Interface Bridge Forwarding Block</h3>
+          <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 10px;">
+            Even though <code>net.ipv4.ip_forward = 1</code> was active, the Linux kernel maintained per-interface bridge forwarding disabled:
+          </p>
+          <pre><code># Kernel Inspection:
+cat /proc/sys/net/ipv4/conf/bridge0/forwarding -> 0 (BLOCKED!)
+ip route get 1.1.1.1 from 192.168.0.150 iif bridge0
+-> RTNETLINK answers: No route to host
+
+# Remediation Applied:
+for f in /proc/sys/net/ipv4/conf/*/forwarding; do echo 1 > "$f"; done
+echo 0 > /proc/sys/net/bridge/bridge-nf-call-iptables</code></pre>
+        </div>
+
+        <div class="tele-card" style="padding: 20px;">
+          <h3 style="color: var(--accent-amber); margin-bottom: 8px;">Barrier 2: Client Default Gateway Route</h3>
+          <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 10px;">
+            The client laptop connected on <code>eth1.1999</code> held a local subnet route (<code>192.168.0.0/24</code>) but lacked a default gateway pointing to <code>192.168.0.1</code>:
+          </p>
+          <pre><code># Client Laptop Command:
+sudo ip route replace default via 192.168.0.1 dev eth1.1999
+
+# Live Result:
+ping -c 3 1.1.1.1
+64 bytes from 1.1.1.1: icmp_seq=1 time=53.5 ms
+0% PACKET LOSS -> Live Internet Flowing!</code></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 7: AUTOMATION SCRIPT -->
+  <div id="tab-deploy" class="tab-pane">
+    <div class="section-card">
+      <div class="section-header">
+        <h2 class="section-title">Production POSIX Automation: nokia_odu_jio_unlock.sh</h2>
+        <span class="badge-pill badge-emerald">BusyBox ASH Compatible</span>
+      </div>
+
+      <p style="margin-bottom: 12px;">
+        To deploy and execute all unlocks, watchdog bypasses, and firewall rules in one atomic command:
+      </p>
+
+      <pre><code># Single-command deployment from host PC:
+cat /home/dc/Documents/airtel-nokia-311nk/nokia_odu_jio_unlock.sh | ssh root@192.168.0.1 "sh"</code></pre>
+
+      <p style="margin-top: 20px; margin-bottom: 8px; font-weight: 600;">Automated Operations Executed:</p>
+      <div class="data-table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Operation</th>
+              <th>Target Path</th>
+              <th>Action Taken</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Watchdog Neutralization</strong></td>
+              <td><code>/bin/wd_pcdtest.sh</code>, <code>postaction.sh</code></td>
+              <td>VFS Bind-mounts <code>/systemrw/dummy_ok.sh</code> (exit 0)</td>
+            </tr>
+            <tr>
+              <td><strong>Disarm PCD Tracker</strong></td>
+              <td><code>/configs/uptime</code></td>
+              <td>Pads flash with synthetic stable durations (<code>0:700</code>)</td>
+            </tr>
+            <tr>
+              <td><strong>QCMAP EoGRE Bypass</strong></td>
+              <td><code>mobileap_cfg_b2c_494_1.xml</code></td>
+              <td>Disables EoGRE, injects APN <code>jionet</code>, sets WWAN backhaul</td>
+            </tr>
+            <tr>
+              <td><strong>Kernel Forwarding</strong></td>
+              <td><code>/proc/sys/net/ipv4/conf/*/forwarding</code></td>
+              <td>Enables IP forward on all interfaces; disables bridge-nf filters</td>
+            </tr>
+            <tr>
+              <td><strong>Netfilter Masquerade</strong></td>
+              <td><code>iptables POSTROUTING</code></td>
+              <td>Injects <code>MASQUERADE</code> on <code>rmnet_data1</code> + TCP MSS clamp</td>
+            </tr>
+            <tr>
+              <td><strong>Telemetry Sinkhole</strong></td>
+              <td><code>/etc/hosts</code></td>
+              <td>Sinkholes Airtel ACS & Corteca USP to loopback (<code>127.0.0.1</code>)</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  function openTab(evt, tabName) {
+    const panes = document.getElementsByClassName("tab-pane");
+    for (let i = 0; i < panes.length; i++) {
+      panes[i].classList.remove("active");
+    }
+    const btns = document.getElementsByClassName("tab-btn");
+    for (let i = 0; i < btns.length; i++) {
+      btns[i].classList.remove("active");
+    }
+    document.getElementById(tabName).classList.add("active");
+    evt.currentTarget.classList.add("active");
+  }
+</script>
+
+</body>
+</html>

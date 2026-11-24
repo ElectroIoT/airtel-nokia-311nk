@@ -1,0 +1,1 @@
+Linux sdxlemur 5.4.289 #1 PREEMPT Thu Jun 18 12:10:15 UTC 2026 armv7l GNU/Linux
